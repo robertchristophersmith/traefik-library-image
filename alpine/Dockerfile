@@ -2,7 +2,8 @@ FROM alpine:3.6
 RUN apk --update upgrade \
     && apk --no-cache --no-progress add ca-certificates \
     && rm -rf /var/cache/apk/*
-COPY traefik /usr/local/bin/
+ADD https://github.com/containous/traefik/releases/download/v1.4.0-rc1/traefik /usr/local/bin/
+RUN chmod +x /usr/local/bin/traefik
 COPY entrypoint.sh /
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

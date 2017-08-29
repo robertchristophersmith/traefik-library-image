@@ -8,18 +8,10 @@ if [ $# -eq 0 ] ; then
 fi
 
 export VERSION=$1
+export ALPINE_VERSION=3.6
 
 # cd to the current directory so the script can be run from anywhere.
 cd `dirname $0`
-
-# Update the certificates.
-echo "Updating certificates..."
-./certs/update.sh
-
-echo "Fetching and building traefik $VERSION..."
-wget -O traefik https://github.com/containous/traefik/releases/download/$VERSION/traefik
-chmod +x traefik
-cp traefik alpine/
 
 echo "Replace $VERSION in Dockerfiles..."
 envsubst < Dockerfile.tmpl > Dockerfile

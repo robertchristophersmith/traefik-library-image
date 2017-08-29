@@ -1,8 +1,9 @@
-FROM alpine:3.6
+FROM alpine:$ALPINE_VERSION
 RUN apk --update upgrade \
     && apk --no-cache --no-progress add ca-certificates \
     && rm -rf /var/cache/apk/*
-COPY traefik /usr/local/bin/
+ADD https://github.com/containous/traefik/releases/download/$VERSION/traefik /usr/local/bin/
+RUN chmod +x /usr/local/bin/traefik
 COPY entrypoint.sh /
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]
@@ -12,6 +13,6 @@ CMD ["--help"]
 LABEL org.label-schema.vendor="Containous" \
       org.label-schema.url="https://traefik.io" \
       org.label-schema.name="Traefik" \
-      org.label-schema.description="A modern reverse-proxy" \    
+      org.label-schema.description="A modern reverse-proxy" \
       org.label-schema.version="$VERSION" \
       org.label-schema.docker.schema-version="1.0"
