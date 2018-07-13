@@ -1,0 +1,245 @@
+################################################################
+# Global configuration
+################################################################
+
+# Enable debug mode
+# Optional - Default: false
+debug = true
+
+# Log level
+# Accepted values, in order of severity: "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "PANIC"
+# Messages at and above the selected level will be logged.
+# Optional - Default: "ERROR"
+logLevel = "INFO"
+
+# Entrypoints to be used by frontends that do not specify any entrypoint.
+# Each frontend can specify its own entrypoints.
+# Optional - Default: ["http"]
+defaultEntryPoints = ["http", "https"]
+
+
+################################################################
+# Entrypoints configuration
+################################################################
+
+# Entrypoints definition
+# Optional
+[entryPoints]
+
+[entryPoints.http]
+address = ":80"
+
+[entryPoints.http.redirect]
+entryPoint = "https"
+
+[entryPoints.https]
+address = ":443"
+
+[entryPoints.https.tls]
+minVersion = "VersionTLS12"
+cipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384"]
+
+[[entryPoints.https.tls.certificates]]
+certFile = "/app/certs/acme-wildcard-certificate.crt"
+keyFile = "/app/certs/acme-wildcard-certificate.key"
+
+[retry]
+
+
+################################################################
+# Docker Provider
+################################################################
+
+# Enable Docker Provider.
+[docker]
+
+# Docker server endpoint. Can be a tcp or a unix socket endpoint.
+# Required - Default for tcp: "tcp://10.10.10.10:2375" or use unix socket
+endpoint = "unix:///var/run/docker.sock"
+
+# Default domain used.
+# Can be overridden by setting the "traefik.domain" label on a container.
+# Optional - Default: ""
+domain = "wufgear.robertcsmith.com"
+
+# Enable watch docker changes.
+# Optional - Default: true
+watch = true
+
+# Expose containers by default in Traefik.
+# If set to false, containers that don't have `traefik.enable=true` will be ignored.
+# Optional - Default: true
+exposedByDefault = false
+
+# Use the IP address from the binded port instead of the inner network one.
+# For specific use-case :)
+# Optional - Default: false
+# usebindportip = true
+
+# Use Swarm Mode services as data provider.
+# Required - Default: false
+swarmMode = false
+
+# Enable docker TLS connection.
+# Optional
+#  [docker.tls]
+#  ca = "/etc/ssl/ca.crt"
+#  cert = "/etc/ssl/docker.crt"
+#  key = "/etc/ssl/docker.key"
+#  insecureSkipVerify = true
+
+
+################################################################
+# ACME SSL/TLS configuration
+################################################################
+
+# Enable ACME (Let's Encrypt): automatic SSL.
+[acme]
+
+# Email address used for registration.
+# Required
+email = "robertchristophersmith@gmail.com"
+
+# File or key used for certificates storage.
+# Required
+storage = "acme.json"
+
+# CA server to use.
+# Uncomment the line to use Let's Encrypt's staging server,
+# leave commented to go to prod.
+# Optional - Default: "https://acme-v02.api.letsencrypt.org/directory"
+caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+# Entrypoint to proxy that acme applies certificates to.
+# Required
+entryPoint = "https"
+
+# If true, display debug log messages from the acme client library.
+# Optional - Default: false
+acmeLogging = true
+
+# Use a DNS-01 ACME challenge rather than HTTP-01 challenge.
+# Note: mandatory for wildcard certificate generation.
+# Optional
+[acme.dnsChallenge]
+
+# DNS provider used.
+# Required
+provider = "digitalocean"
+
+# By default, the provider will verify the TXT DNS challenge record before letting ACME verify.
+# If delayBeforeCheck is greater than zero, this check is delayed for the configured duration in seconds.
+# Useful if internal networks block external DNS queries.
+# Optional - Default: 0
+delayBeforeCheck = 1
+
+# Domains list.
+# Only domains defined here can generate wildcard certificates.
+# [[acme.domains]]
+#   main = "local1.com"
+#   sans = ["test1.local1.com", "test2.local1.com"]
+# [[acme.domains]]
+#   main = "local2.com"
+# [[acme.domains]]
+#   main = "*.local3.com"
+#   sans = ["local3.com", "test1.test1.local3.com"]
+[[acme.domains]]
+
+main = "*.robertcsmith.me"
+sans = ["robertcsmith.me"]
+
+
+################################################################
+# Traefik logs configuration
+################################################################
+
+# Traefik logs
+# Enabled by default and log to json, set to "common" for stdout
+# Optional
+[traefikLog]
+
+# Sets the filepath for the traefik log. If not specified, stdout will be used.
+# Intermediate directories are created if necessary.
+# Optional - Default: os.Stdout
+filePath = "/app/logs/traefik.log"
+
+# Format is either "json" or "common".
+# Optional - Default: "common"
+format = "json"
+
+# Access logs
+# Disabled by default and not well documented
+# Optional
+[accessLog]
+
+# Sets the filepath for the traefik log. If not specified, stdout will be used.
+# Intermediate directories are created if necessary.
+# Optional - Default: os.Stdout
+filePath = "/app/logs/access.log"
+
+# Format is either "json" or "common".
+# Optional - Default: "common"
+format = "json"
+
+[accessLog.filters]
+
+# statusCodes keep only access logs with status codes in the specified range
+# Optional - Default: []
+statusCodes = ["200", "300-302"]
+
+# retryAttempts keep access logs when at least one retry happened
+# Optional - Default: false
+retryAttempts = true
+
+[accessLog.fields]
+
+# defaultMode
+# Optional - Default: "keep" - Accepted values "keep", "drop"
+defaultMode = "keep"
+
+[accessLog.fields.headers]
+
+# defaultMode
+# Optional- Default: "keep" - Accepted values "keep", "drop", "redact"
+defaultMode = "keep"
+
+
+################################################################
+# API and dashboard configuration
+################################################################
+
+# Enable API and dashboard
+[api]
+
+# Name of the related entry point
+# Optional - Default: "traefik"
+entryPoint = "traefik"
+
+# Enable Dashboard
+# Optional - Default: true
+dashboard = true
+
+# Enable debug mode.
+# This will install HTTP handlers to expose Go expvars under /debug/vars and
+# pprof profiling data under /debug/pprof.
+# Additionally, the log level will be set to DEBUG.
+# Optional - Default: false
+debug = true
+
+[api.auth.basic]
+users = ["admin:$apr1$x1676rfV$lImZBdduyt7/AILjuGu5j/"]
+
+
+################################################################
+# Ping configuration
+################################################################
+
+# Enable ping
+[ping]
+
+# Name of the related entry point
+# Optional - Default: "traefik"
+entryPoint = "traefik"
+
+
+
